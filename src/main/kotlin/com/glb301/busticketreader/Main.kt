@@ -1,13 +1,14 @@
 package com.glb301.busticketreader
 
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import com.glb301.busticketreader.database.Station
 import com.glb301.busticketreader.database.User
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.gson
 import io.ktor.http.HttpStatusCode
+import io.ktor.request.receiveOrNull
 import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.post
@@ -44,13 +45,79 @@ fun main(args: Array<String>) {
                 })
             }
 
+            get("/stations/{stationId}") {
+                val stationIdRaw = context.parameters["userId"]!!.toIntOrNull()
+                val stationId = if (stationIdRaw != null) {
+                    stationIdRaw
+                } else {
+                    context.respond(HttpStatusCode.BadRequest, "Bad station id.")
+                    return@get
+                }
+
+                val station = jd.open().use { handle -> User.findById(handle, stationId) }
+                if (station == null) {
+                    context.respond(HttpStatusCode.NotFound, "Station not found!")
+                    return@get
+                }
+
+                context.respond(station)
+            }
+
+            post("/stations/new") {
+                val body = context.receiveOrNull<Station>()
+                if (body == null) {
+                    context.respond(HttpStatusCode.BadRequest, "Bad station body.")
+                    return@post
+                }
+
+                try {
+                    jd.open().use { handle -> Station.insert(handle, body) }
+                    context.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    context.respond(HttpStatusCode.BadRequest, "Could not create station.")
+                }
+            }
+
             get("/users") {
                 context.respond(jd.open().use { handle -> User.findAll(handle) })
             }
 
+            get("/users/{userId}") {
+                val userIdRaw = context.parameters["userId"]!!.toIntOrNull()
+                val userId = if (userIdRaw != null) {
+                    userIdRaw
+                } else {
+                    context.respond(HttpStatusCode.BadRequest, "Bad user id.")
+                    return@get
+                }
+
+                val user = jd.open().use { handle -> User.findById(handle, userId) }
+                if (user == null) {
+                    context.respond(HttpStatusCode.NotFound, "User not found!")
+                    return@get
+                }
+
+                context.respond(user)
+            }
+
+            post("/users/new") {
+                val body = context.receiveOrNull<User>()
+                if (body == null) {
+                    context.respond(HttpStatusCode.BadRequest, "Bad user body.")
+                    return@post
+                }
+
+                try {
+                    jd.open().use { handle -> User.insert(handle, body) }
+                    context.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    context.respond(HttpStatusCode.BadRequest, "Could not create user.")
+                }
+            }
+
             post("/users/{userId}/withdrawTicket") {
                 val userIdRaw = context.parameters["userId"]!!.toIntOrNull()
-                val userId = if (userIdRaw != null)  {
+                val userId = if (userIdRaw != null) {
                     userIdRaw
                 } else {
                     context.respond(HttpStatusCode.BadRequest, "Bad user id")

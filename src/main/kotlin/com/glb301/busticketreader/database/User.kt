@@ -10,7 +10,8 @@ private var userIdCounter = 1
 data class User(val id: Int, val name: String, val isStudent: Boolean, val balance: Int) {
     companion object {
         fun createTable(handle: Handle) {
-            handle.createUpdate("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, isStudent BOOLEAN, balance INTEGER)").execute()
+            handle.createUpdate("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, isStudent BOOLEAN, balance INTEGER)")
+                .execute()
         }
 
         fun insert(handle: Handle, user: User) {

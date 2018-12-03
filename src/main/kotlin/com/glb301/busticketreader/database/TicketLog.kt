@@ -4,7 +4,7 @@ import org.jdbi.v3.sqlobject.SqlObject
 import org.jdbi.v3.sqlobject.statement.SqlQuery
 import org.jdbi.v3.sqlobject.statement.SqlUpdate
 
-interface TicketLogDao: SqlObject {
+interface TicketLogDao : SqlObject {
     @SqlUpdate("CREATE TABLE IF NOT EXISTS ticketLogs (id INTEGER PRIMARY KEY AUTO_INCREMENT, userId INTEGER, ")
     fun createTable()
 
